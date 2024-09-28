@@ -46,10 +46,13 @@ The `login.feature` file contains the Gherkin scenarios that define the login te
 Feature: Login functionality
 
   Scenario: Valid user login
-    Given the user is on the login page
-    When the user enters valid credentials
-    Then the user should be logged in successfully
+    Given the website "https://example.com" is accessed
+    When the user logs in with the following credentials:
+      | name      | password  |
+      | myUser    | myPass    |
+    Then the user should be logged in and see a success message
 ```
+
 This scenario outlines the steps for testing a valid user login, which are later implemented in the step definitions.
 
 ## webDriverSetup.java
@@ -79,5 +82,73 @@ This runner looks for feature files in the features folder and step definitions 
 
 The webTest.java file contains the step definitions that link the Gherkin steps to the actual test code. This file translates the plain English steps into Selenium actions.
 
-### Example Step Definition:
+### Example Step Definitions:
 
+- Accessing the website:
+
+```java
+Accessing the website:
+```
+
+This initializes the Selenium WebDriver and navigates to the given URL.
+
+- Logging in with credentials:
+
+```java
+@When("the user logs in with the following credentials:")
+public void the_user_logs_in_with_the_following_credentials(io.cucumber.datatable.DataTable dataTable) {
+    List<Map<String, String>> table = dataTable.asMaps(String.class, String.class);
+    String name = comp.getValue(table, 0);
+    String password = comp.getValue(table, 1);
+    comp.commandPage(driver, "name", page.name(), "click", null);
+    comp.commandPage(driver, "name", page.name(), "send", name);
+    comp.commandPage(driver, "id", page.password(), "click", null);
+    comp.commandPage(driver, "id", page.password(), "send", password);
+}
+```
+
+This method fills in the login form with the provided username and password using Selenium.
+
+- Validating successful login:
+
+```java
+@Then("the user should be logged in and see a success message")
+public void the_user_should_be_logged_in_and_see_a_success_message() {
+    comp.commandPage(driver, "xpath", page.button(), "click", null);
+    init.quitPage();
+}
+```
+
+This validates that the login was successful and closes the browser after.
+
+## elementsWeb.java
+
+The elementsWeb.java file contains locators for web elements. It centralizes the management of web element locators, making it easier to update if the web page structure changes.
+
+```java
+public String name() { return "username"; }
+public String password() {return "password";}
+```
+
+## component.java
+
+The component.java file likely contains helper functions or reusable components that are used across multiple test scenarios, simplifying test code and promoting reuse.
+
+## What's New?
+
+This project now supports the following technologies:
+- Java 11+
+- Selenium WebDriver 4.x
+- Cucumber 6.x for BDD-style testing.
+
+### How to Use This Project:
+
+To use this project, simply clone the repository and configure the required dependencies using Maven.
+
+## Running the Tests:
+
+You can run the Cucumber tests using the following Maven command:
+
+```bash
+mvn test
+```
